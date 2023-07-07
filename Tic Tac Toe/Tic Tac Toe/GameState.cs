@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tic_Tac_Toe
 {
@@ -49,7 +45,7 @@ namespace Tic_Tac_Toe
 
         private bool AreSquaresMarked((int, int)[] squares, Player player)
         {
-            foreach((int r, int c) in squares)
+            foreach ((int r, int c) in squares)
             {
                 if (GameGrid[r, c] != player)
                 {
@@ -62,8 +58,8 @@ namespace Tic_Tac_Toe
 
         private bool DidMoveWin(int r, int c, out WinInfo winInfo)
         {
-            (int, int)[] row = new[] { (r, 0), (r, 1), (r, 2)};
-            (int, int)[] col = new[] { (0, c), (1, c), (2, c)};
+            (int, int)[] row = new[] { (r, 0), (r, 1), (r, 2) };
+            (int, int)[] col = new[] { (0, c), (1, c), (2, c) };
             (int, int)[] mainDiag = new[] { (0, 0), (1, 1), (2, 2) };
             (int, int)[] antiDiag = new[] { (0, 2), (1, 1), (2, 0) };
 
@@ -87,7 +83,7 @@ namespace Tic_Tac_Toe
 
             if (AreSquaresMarked(antiDiag, CurrentPlayer))
             {
-                winInfo = new WinInfo { Type = WinType.Antidiagonal};
+                winInfo = new WinInfo { Type = WinType.Antidiagonal };
                 return true;
             }
 
@@ -99,13 +95,13 @@ namespace Tic_Tac_Toe
         {
             if (DidMoveWin(r, c, out WinInfo winInfo))
             {
-                gameResult = new GameResult { Winner = CurrentPlayer, WinInfo = winInfo};
+                gameResult = new GameResult { Winner = CurrentPlayer, WinInfo = winInfo };
                 return true;
             }
 
             if (IsGridFull())
             {
-                gameResult = new GameResult { Winner = Player.None};
+                gameResult = new GameResult { Winner = Player.None };
                 return true;
             }
 
