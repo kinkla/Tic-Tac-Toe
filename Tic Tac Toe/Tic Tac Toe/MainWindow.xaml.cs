@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,8 +63,45 @@ namespace Tic_Tac_Toe
         private void TransitionToGameScreen()
         {
             EndScreen.Visibility = Visibility.Hidden;
+            Line.Visibility = Visibility.Hidden;
             TurnPanel.Visibility = Visibility.Visible;
             GameCanvas.Visibility = Visibility.Visible;
+        }
+
+        private (Point, Point) FindlinePoints(WinInfo winInfo)
+        {
+            double sqareSize = GameGrid.Width / 3;
+            double margin = sqareSize / 2;
+
+            if (winInfo.Type == WinType.Row)
+            {
+                double y = winInfo.Number * sqareSize + margin;
+                return (new Point(0, y), new Point(GameGrid.Width, y));
+            }
+            if(winInfo.Type == WinType.Column)
+            {
+                double x = winInfo.Number * sqareSize + margin;
+                return (new Point(x, 0), new Point(x, GameGrid.Height));
+            }
+            if(winInfo.Type == WinType.MainDiagonal)
+            {
+                return (new Point(0, 0), new Point(GameGrid.Width, GameGrid.Height));
+            }
+
+            return (new Point(GameGrid.Width, 0), new Point(0, GameGrid.Height));
+        }
+
+        private void ShowLine(WinInfo winInfo)
+        {
+            (Point start, Point end) = FindlinePoints(winInfo);
+
+            Line.X1 = start.X;
+            Line.Y1 = start.Y;
+
+            Line.X2 = end.X;
+            Line.Y2 = end.Y;
+
+            Line.Visibility = Visibility.Visible;
         }
 
         private void OnMoveMade(int r, int c)
@@ -83,6 +121,8 @@ namespace Tic_Tac_Toe
             }
             else
             {
+                ShowLine(gameResult.WinInfo);
+                await Task.Delay(1000);
                 TransitionToEndScreen("Winner: ", imageSources[gameResult.Winner]);
             }
         }
