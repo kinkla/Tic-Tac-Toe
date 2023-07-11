@@ -25,6 +25,20 @@ namespace Tic_Tac_Toe
             { Player.O, new ObjectAnimationUsingKeyFrames() }
         };
 
+        private readonly DoubleAnimation fadeOutAnimation = new DoubleAnimation
+        {
+            Duration = TimeSpan.FromSeconds(.5),
+            From = 1,
+            To = 0
+        };
+
+        private readonly DoubleAnimation fadeInAnimation = new DoubleAnimation
+        {
+            Duration = TimeSpan.FromSeconds(.5),
+            From = 0,
+            To = 1
+        };
+
         private readonly Image[,] imageControls = new Image[3, 3];
         private readonly GameState gameState = new GameState();
 
@@ -71,21 +85,33 @@ namespace Tic_Tac_Toe
             }
         }
 
-        private void TransitionToEndScreen(string text, ImageSource winnerImage)
+        private async Task FadeOut(UIElement uIElement)
         {
-            TurnPanel.Visibility = Visibility.Hidden;
-            GameCanvas.Visibility = Visibility.Hidden;
-            ResultText.Text = text;
-            WinnerImage.Source = winnerImage;
-            EndScreen.Visibility = Visibility.Visible;
+            uIElement.BeginAnimation(OpacityProperty, fadeOutAnimation);
+            await Task.Delay(fadeOutAnimation.Duration.TimeSpan);
+            uIElement.Visibility = Visibility.Hidden;
         }
 
-        private void TransitionToGameScreen()
+        private async Task FadeIn(UIElement uIElement)
         {
-            EndScreen.Visibility = Visibility.Hidden;
+            uIElement.Visibility = Visibility.Visible;
+            uIElement.BeginAnimation(OpacityProperty, fadeInAnimation);
+            await Task.Delay(fadeInAnimation.Duration.TimeSpan);
+        }
+
+        private async Task TransitionToEndScreen(string text, ImageSource winnerImage)
+        {
+            await Task.WhenAll(FadeOut(TurnPanel), FadeOut(GameCanvas));
+            ResultText.Text = text;
+            WinnerImage.Source = winnerImage;
+            await FadeIn(EndScreen);
+        }
+
+        private async void TransitionToGameScreen()
+        {
+            await FadeOut(EndScreen);
             Line.Visibility = Visibility.Hidden;
-            TurnPanel.Visibility = Visibility.Visible;
-            GameCanvas.Visibility = Visibility.Visible;
+            await Task.WhenAll(FadeIn(TurnPanel), FadeIn(GameCanvas));
         }
 
         private (Point, Point) FindlinePoints(WinInfo winInfo)
@@ -137,17 +163,17 @@ namespace Tic_Tac_Toe
 
             if (gameResult.Winner == Player.None)
             {
-                TransitionToEndScreen("It is a tie!", null);
+                await TransitionToEndScreen("It is a tie!", null);
             }
             else
             {
                 ShowLine(gameResult.WinInfo);
                 await Task.Delay(1000);
-                TransitionToEndScreen("Winner: ", imageSources[gameResult.Winner]);
+                await TransitionToEndScreen("Winner: ", imageSources[gameResult.Winner]);
             }
         }
 
-        private void onGameRestarted()
+        private async void onGameRestarted()
         {
             for (int r = 0; r < 3; r++)
             {
@@ -173,7 +199,10 @@ namespace Tic_Tac_Toe
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            gameState.Reset();
+            if (gameState.GameOver)
+            {
+                gameState.Reset();
+            }
         }
     }
 }
