@@ -137,7 +137,7 @@ namespace Tic_Tac_Toe
             return (new Point(GameGrid.Width, 0), new Point(0, GameGrid.Height));
         }
 
-        private void ShowLine(WinInfo winInfo)
+        private async Task ShowLine(WinInfo winInfo)
         {
             (Point start, Point end) = FindlinePoints(winInfo);
 
@@ -147,7 +147,24 @@ namespace Tic_Tac_Toe
             Line.X2 = end.X;
             Line.Y2 = end.Y;
 
+            DoubleAnimation x2Animation = new DoubleAnimation
+            {
+                Duration = TimeSpan.FromSeconds(.25),
+                From = start.X,
+                To = end.X
+            };
+
+            DoubleAnimation y2Animation = new DoubleAnimation
+            {
+                Duration = TimeSpan.FromSeconds(.25),
+                From = start.Y,
+                To = end.Y
+            };
+
             Line.Visibility = Visibility.Visible;
+            Line.BeginAnimation(Line.X2Property, x2Animation);
+            Line.BeginAnimation(Line.Y2Property, y2Animation);
+            await Task.Delay(x2Animation.Duration.TimeSpan);
         }
 
         private void OnMoveMade(int r, int c)
@@ -167,8 +184,7 @@ namespace Tic_Tac_Toe
             }
             else
             {
-                ShowLine(gameResult.WinInfo);
-                await Task.Delay(1000);
+                await ShowLine(gameResult.WinInfo);
                 await TransitionToEndScreen("Winner: ", imageSources[gameResult.Winner]);
             }
         }
